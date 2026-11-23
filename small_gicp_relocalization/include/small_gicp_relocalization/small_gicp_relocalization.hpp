@@ -23,7 +23,6 @@
 #include "pcl/io/pcd_io.h"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
-#include "std_msgs/msg/int32.hpp"
 #include "small_gicp/ann/kdtree_omp.hpp"
 #include "small_gicp/factors/gicp_factor.hpp"
 #include "small_gicp/pcl/pcl_point.hpp"
@@ -50,21 +49,12 @@ private:
 
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr pcd_sub_;
   rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initial_pose_sub_;
-  rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pose_pub_;
-  rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr failures_pub_;
 
   int num_threads_;
   int num_neighbors_;
   float global_leaf_size_;
   float registered_leaf_size_;
   float max_dist_sq_;
-  // 【业务收敛半径】单帧 GICP 输出与上次结果的位姿位移阈值 (单位 m)。
-  // result.converged 仅表 GICP 数值收敛, 还需 ||Δt|| <= convergence_radius_ 才算业务收敛。
-  // 超阈视为跳变, 拒绝更新 previous_result_t_, 计入 consecutive_failures_。
-  double convergence_radius_;
-  // 【失败容忍】连续未收敛帧数上限。<= 此值时仅 WARN, 超过才升级为 ERROR。
-  int max_consecutive_failures_;
-  int consecutive_failures_;  // 运行时计数器, 业务收敛即清零
   std::vector<double> init_pose_;
 
   std::string map_frame_;

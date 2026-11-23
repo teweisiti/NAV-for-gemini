@@ -12,8 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from launch import LaunchDescription
 from launch_ros.actions import Node
+
+from launch import LaunchDescription
+
+import os
+from ament_index_python.packages import get_package_share_directory
+
+pcd_path = os.path.join(
+    get_package_share_directory('small_gicp_relocalization'),
+    'pcd',
+    'prior.pcd'
+)
 
 
 def generate_launch_description():
@@ -40,12 +50,9 @@ def generate_launch_description():
                 "max_dist_sq": 1.0,
                 "map_frame": "map",
                 "odom_frame": "odom",
-                # 核心改动：由于点云进入 GICP 前已经被完全转正，这里强行指定基准系与雷达系一致
-                # 从而彻底免疫由于雷达倒装引起的二次翻转（双重变换）Bug
-                "base_frame": "base_link",
-                "lidar_frame": "base_link",
-                "prior_pcd_file": "",
-                # 核心改动：修改输入话题为车体过滤节点输出的干净点云话题
+                "base_frame": "",
+                "lidar_frame": "",
+                "prior_pcd_file": pcd_path,
                 "input_cloud_topic": "cloud_filtered",
             }
         ],
